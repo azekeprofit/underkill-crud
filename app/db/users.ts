@@ -9,11 +9,3 @@ export const UserSchema=object({
 })
 
 export type User=InferInput<typeof UserSchema>;
-
-// export const postUser = async (addedUser: typeof UsersTable.$inferInsert) => {
-//   return (await db.insert(UsersTable).values(addedUser)).rowCount;
-// };
-
-// export const deleteUser = async (id: number) => {
-//   return (await db.delete(UsersTable).where(eq(UsersTable.id,id))).rowCount
-// };

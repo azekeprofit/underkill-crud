@@ -1,9 +1,10 @@
 import { FormValibot } from "#app/db/useFormValibot.js";
 import { UserSchema, type User } from "#app/db/users.js";
-import { Link } from "react-router";
+import { Link, useNavigation } from "react-router";
 import { safeParse } from "valibot";
 import { db, runSql } from "../db";
 import type * as Route from "./+types.user.($userId)";
+
 
 
 const getUserDetailSQL = db.prepare(`select id,name,surname,phone,email from Users where id=:userId`);
@@ -19,6 +20,7 @@ const updateUserSQL = db.prepare(`update Users SET name=:name,surname=:surname,p
 export async function action({
     request,
 }: Route.ActionArgs) {
+    await new Promise(resolve => setTimeout(resolve, 5000)); // artificial throttling
     let formData = await request.formData();
     const result = safeParse(UserSchema, Object.fromEntries(formData));
     const errorsArr = (result?.issues ?? []).map(({ path, type, message }) => [path?.[0]?.key, { type, message }]);
@@ -35,6 +37,8 @@ export default function UserDetails({
     loaderData,
     actionData
 }: Route.ComponentProps) {
+    const nav = useNavigation();
+    const isPending = !!nav.location;
     return <>
         <FormValibot serverErrors={actionData} data={loaderData} schema={UserSchema} fields={
             ({ register, fieldError, getValues, formState: { errors } }) => <>
@@ -49,7 +53,7 @@ export default function UserDetails({
                 <p>phone: <input {...register('phone')} /></p>
                 {fieldError('phone')}
                 <p>
-                    <input type="submit" value="Save" className="border-1 rounded-e mr-2" />
+                    <button disabled={isPending} className="border-1 rounded-e mr-2">{isPending ? 'Saving..' : 'Save'}</button>
                     <Link to="/users">back to Users</Link>
                 </p>
             </>

@@ -1,7 +1,7 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useCallback, useRef, type JSX } from "react";
 import { useForm, type DefaultValues, type FieldErrors, type FieldValues, type GlobalError, type Path, type RegisterOptions } from "react-hook-form";
-import { Form } from "react-router";
+import { Form, useSubmit } from "react-router";
 import type { InferInput, ObjectEntries, ObjectSchema } from "valibot";
 
 
@@ -28,8 +28,9 @@ export function FormValibot<Schema extends ObjectSchema<ObjectEntries, undefined
         serverErrors?: FieldErrors<Type>,
         fields: (formObj: ReturnType<typeof useFormValibot<Schema, Type>>) => JSX.Element
     }) {
+    const submitAction = useSubmit();
     const form = useRef<HTMLFormElement>(null!);
-    const submit = useCallback(() => form.current.submit(), [form.current]);
+    const submit = useCallback(() => { if (form.current) submitAction(form.current) }, [form.current, submitAction]);
     const formObj = useFormValibot(data, schema, serverErrors);
     return <Form method="post" ref={form} onSubmit={formObj.handleSubmit(submit)}>{fields(formObj)}</Form>
 }
